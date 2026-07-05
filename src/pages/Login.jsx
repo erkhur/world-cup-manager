@@ -32,7 +32,7 @@ export default function Login() {
           <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center mb-3">
             <span className="text-white text-2xl">⚽</span>
           </div>
-          <h1 className="text-xl font-bold text-gray-800">World Cup Manager</h1>
+          <h1 className="text-xl font-bold text-gray-800">2026 FIFA World Cup</h1>
           <p className="text-sm text-gray-400 mt-1">Inicia sesión para continuar</p>
         </div>
 
