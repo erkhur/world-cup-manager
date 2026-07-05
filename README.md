@@ -30,7 +30,7 @@ Aplicación fullstack para gestionar datos del Mundial de Fútbol 2026 (Canada /
 
 ## 📋 Funcionalidades
 
-- 🔐 **Login** — Autenticación con Supabase Auth y rutas protegidas
+- 🔐 **Login** — Autenticación con Supabase Auth, rutas protegidas, mostrar/ocultar contraseña y diseño con fondo del Mundial
 - 📊 **Dashboard** — Estadísticas en tiempo real con datos del Mundial 2026
 - 🛡️ **Equipos** — CRUD completo con bandera, confederación, grupo y ranking FIFA
 - 👥 **Jugadores** — CRUD completo con foto, posición, dorsal y equipo asignado
