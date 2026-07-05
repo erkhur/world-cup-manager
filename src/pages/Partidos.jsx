@@ -92,7 +92,7 @@ export default function Partidos() {
 
       <div className="bg-white rounded-xl shadow p-5 mb-8">
         <h2 className="text-lg font-semibold text-gray-700 mb-4">Agregar Partido</h2>
-        <form onSubmit={agregarPartido} className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <form onSubmit={agregarPartido} className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
           <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" value={localId} onChange={e => setLocalId(e.target.value)} required>
             <option value="">Equipo Local</option>
             {equipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
@@ -122,7 +122,7 @@ export default function Partidos() {
         />
       </div>
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+      <div className="bg-white rounded-xl shadow overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
             <tr>

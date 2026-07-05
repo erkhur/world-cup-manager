@@ -99,7 +99,7 @@ export default function Posiciones() {
 
       <div className="bg-white rounded-xl shadow p-5 mb-8">
         <h2 className="text-lg font-semibold text-gray-700 mb-4">Agregar Posición</h2>
-        <form onSubmit={agregarPosicion} className="grid grid-cols-3 gap-3 md:grid-cols-5">
+        <form onSubmit={agregarPosicion} className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-5">
           <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" value={equipoId} onChange={e => setEquipoId(e.target.value)} required>
             <option value="">Equipo</option>
             {equipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
@@ -134,7 +134,7 @@ export default function Posiciones() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+      <div className="bg-white rounded-xl shadow overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
             <tr>

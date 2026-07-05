@@ -1,17 +1,29 @@
+import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 
 export default function AppLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-surface">
-      <Sidebar />
-      <div className="ml-64 flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+      {/* Overlay móvil */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <div className="lg:ml-64 flex flex-col min-h-screen">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
           <Outlet />
         </main>
-        <footer className="ml-0 border-t border-gray-100 py-4 px-6 flex items-center justify-center gap-2 text-xs text-gray-400">
+        <footer className="border-t border-gray-100 py-4 px-6 flex items-center justify-center gap-2 text-xs text-gray-400 flex-wrap">
           <span>Desarrollado por</span>
           <span className="font-semibold text-gray-600">Coderk</span>
           <a
@@ -26,14 +38,10 @@ export default function AppLayout() {
             </svg>
           </a>
           <span>·</span>
-          <span>2026</span>
-          <span>™</span>
+          <span>2026 ™</span>
           <span>·</span>
           <span>Soporte:</span>
-          <a
-            href="mailto:erkhur@gmail.com"
-            className="text-gray-500 hover:text-gray-700 transition underline"
-          >
+          <a href="mailto:erkhur@gmail.com" className="text-gray-500 hover:text-gray-700 transition underline">
             erkhur@gmail.com
           </a>
         </footer>
