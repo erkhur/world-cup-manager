@@ -1,46 +1,80 @@
-const cards = [
-  { icon: 'groups', label: 'Total Equipos', value: '32' },
-  { icon: 'person', label: 'Total Jugadores', value: '736' },
-  { icon: 'sports_soccer', label: 'Total Partidos', value: '64' },
-  { icon: 'sports_score', label: 'Total Goles', value: '172' },
-  { icon: 'analytics', label: 'Prom. Goles/Partido', value: '2.69' },
-]
+import { createClient } from "@supabase/supabase-js"
+import { useState, useEffect } from "react"
+import { Shield, Users, Swords, Trophy, TrendingUp } from "lucide-react"
 
-const partidos = [
-  { local: 'Argentina', golesLocal: 3, visitante: 'Francia', golesVisitante: 3, fase: 'Final', fecha: '18/12/2022' },
-  { local: 'Argentina', golesLocal: 3, visitante: 'Croacia', golesVisitante: 0, fase: 'Semifinal', fecha: '13/12/2022' },
-  { local: 'Francia', golesLocal: 2, visitante: 'Marruecos', golesVisitante: 0, fase: 'Semifinal', fecha: '14/12/2022' },
-  { local: 'Argentina', golesLocal: 2, visitante: 'Países Bajos', golesVisitante: 2, fase: 'Cuartos de Final', fecha: '09/12/2022' },
-  { local: 'Brasil', golesLocal: 1, visitante: 'Croacia', golesVisitante: 1, fase: 'Cuartos de Final', fecha: '09/12/2022' },
-]
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+)
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    equipos: 0, jugadores: 0, partidos: 0, goles: 0, promedio: "0.00"
+  })
+  const [ultimosPartidos, setUltimosPartidos] = useState([])
+
+  useEffect(() => {
+    cargarStats()
+    cargarUltimosPartidos()
+  }, [])
+
+  async function cargarStats() {
+    const [eq, jug, par, gol] = await Promise.all([
+      supabase.from("equipos").select("*", { count: "exact", head: true }),
+      supabase.from("jugadores").select("*", { count: "exact", head: true }),
+      supabase.from("partidos").select("*", { count: "exact", head: true }),
+      supabase.from("goles").select("*", { count: "exact", head: true }),
+    ])
+    const totalGoles = gol.count ?? 0
+    const totalPartidos = par.count ?? 0
+    const promedio = totalPartidos > 0 ? (totalGoles / totalPartidos).toFixed(2) : "0.00"
+    setStats({
+      equipos: eq.count ?? 0,
+      jugadores: jug.count ?? 0,
+      partidos: totalPartidos,
+      goles: totalGoles,
+      promedio
+    })
+  }
+
+  async function cargarUltimosPartidos() {
+    const { data, error } = await supabase
+      .from("partidos")
+      .select("*, local:equipos!local_id(nombre, imagen_url), visitante:equipos!visitante_id(nombre, imagen_url)")
+      .order("fecha", { ascending: false })
+      .limit(5)
+    if (error) { console.error(error); return }
+    setUltimosPartidos(data)
+  }
+
+  const cards = [
+    { icon: Shield,    label: "Total Equipos",       value: stats.equipos   },
+    { icon: Users,     label: "Total Jugadores",     value: stats.jugadores },
+    { icon: Swords,    label: "Total Partidos",      value: stats.partidos  },
+    { icon: Trophy,    label: "Total Goles",         value: stats.goles     },
+    { icon: TrendingUp,label: "Prom. Goles/Partido", value: stats.promedio  },
+  ]
+
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="text-display-lg text-primary">Dashboard</h2>
-        <p className="text-body-lg text-on-surface-variant mt-1">
-          Resumen del torneo
-        </p>
+        <p className="text-body-lg text-on-surface-variant mt-1">Resumen del torneo</p>
       </div>
 
       <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {cards.map((card) => (
-          <div
-            key={card.label}
-            className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="w-10 h-10 rounded-lg bg-primary-fixed text-primary flex items-center justify-center mb-4">
-              <span className="material-symbols-outlined">{card.icon}</span>
+        {cards.map((card) => {
+          const Icon = card.icon
+          return (
+            <div key={card.label} className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 rounded-lg bg-primary-fixed text-primary flex items-center justify-center mb-4">
+                <Icon size={20} />
+              </div>
+              <p className="text-caption text-on-surface-variant uppercase tracking-wider">{card.label}</p>
+              <p className="text-display-lg text-primary mt-1">{card.value}</p>
             </div>
-            <p className="text-caption text-on-surface-variant uppercase tracking-wider">
-              {card.label}
-            </p>
-            <p className="text-display-lg text-primary mt-1">
-              {card.value}
-            </p>
-          </div>
-        ))}
+          )
+        })}
       </section>
 
       <section>
@@ -52,34 +86,33 @@ export default function Dashboard() {
             <div className="col-span-2 text-center">Fase</div>
             <div className="col-span-2 text-right">Resultado</div>
           </div>
-          {partidos.map((p, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-12 gap-4 px-6 py-4 items-center border-b border-outline-variant last:border-0 hover:bg-surface-container-low transition-colors"
-            >
+          {ultimosPartidos.length === 0 ? (
+            <div className="px-6 py-8 text-center text-on-surface-variant text-body-md">
+              No hay partidos registrados aún
+            </div>
+          ) : ultimosPartidos.map((p) => (
+            <div key={p.id} className="grid grid-cols-12 gap-4 px-6 py-4 items-center border-b border-outline-variant last:border-0 hover:bg-surface-container-low transition-colors">
               <div className="col-span-2 text-body-md text-on-surface-variant">
-                {p.fecha}
+                {p.fecha ? new Date(p.fecha).toLocaleDateString("es-PE") : "—"}
               </div>
               <div className="col-span-6 flex justify-center items-center gap-3">
-                <span className="text-body-md font-medium text-on-surface text-right">
-                  {p.local}
-                </span>
+                {p.local?.imagen_url && (
+                  <img src={p.local.imagen_url} alt={p.local.nombre} className="w-6 h-6 rounded object-cover" />
+                )}
+                <span className="text-body-md font-medium text-on-surface text-right">{p.local?.nombre}</span>
                 <span className="text-headline-sm text-primary font-bold bg-primary-fixed px-3 py-1 rounded">
-                  {p.golesLocal} - {p.golesVisitante}
+                  {p.goles_local} - {p.goles_visitante}
                 </span>
-                <span className="text-body-md font-medium text-on-surface text-left">
-                  {p.visitante}
-                </span>
+                <span className="text-body-md font-medium text-on-surface text-left">{p.visitante?.nombre}</span>
+                {p.visitante?.imagen_url && (
+                  <img src={p.visitante.imagen_url} alt={p.visitante.nombre} className="w-6 h-6 rounded object-cover" />
+                )}
               </div>
               <div className="col-span-2 text-center">
-                <span className="text-caption bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-full">
-                  {p.fase}
-                </span>
+                <span className="text-caption bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-full">{p.fase}</span>
               </div>
               <div className="col-span-2 text-right">
-                <span className="text-caption text-on-surface-variant">
-                  FT
-                </span>
+                <span className="text-caption text-on-surface-variant">FT</span>
               </div>
             </div>
           ))}
